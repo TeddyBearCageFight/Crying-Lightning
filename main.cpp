@@ -20,6 +20,8 @@
 #include <assimp/scene.h> //Output data structure
 #include <assimp/postprocess.h> //Post processing fla
 
+#include "common/controls/controls.hpp"
+
 using namespace glm;
 
 // Shader sources
@@ -99,23 +101,15 @@ GLfloat vertices[] = {
         -1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
 
+
         -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-        1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-        1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
         -1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
     };
 
-mat4 viewMatrix;
-mat4 projMatrix;
-
-mat4 getViewMatrix(){
-    return viewMatrix;
-}
-mat4 getProjectionMatrix(){
-    return projMatrix;
-}
 // Initial position : on +Z
 vec3 position = vec3( 0, 0, 5 ); 
 // Initial horizontal angle : toward -Z
@@ -127,75 +121,6 @@ float initialFoV = 45.0f;
 
 float speed = 3.0f; // 3 units / second
 float mouseSpeed = 0.005f;
-
-/*void computeMatricesFromInputs(){
-
-    // glfwGetTime is called only once, the first time this function is called
-    static double lastTime = glfwGetTime();
-
-    // Compute time difference between current and last frame
-    double currentTime = glfwGetTime();
-    float deltaTime = float( currentTime - lastTime );
-
-    // Get mouse position
-    double xpos, ypos;
-    glfwGetCursorPos( *window, &xpos, &ypos );
-
-    // Reset mouse position for next frame
-    glfwSetCursorPos( *window, 1024/2, 768/2 );
-
-    // Compute new orientation
-    horizontalAngle += mouseSpeed * float(1024/2 - xpos );
-    verticalAngle   += mouseSpeed * float( 768/2 - ypos );
-
-    // Direction : Spherical coordinates to Cartesian coordinates conversion
-    vec3 direction(
-        cos(verticalAngle) * sin(horizontalAngle), 
-        sin(verticalAngle),
-        cos(verticalAngle) * cos(horizontalAngle)
-    );
-    
-    // Right vector
-    vec3 right = vec3(
-        sin(horizontalAngle - 3.14f/2.0f), 
-        0,
-        cos(horizontalAngle - 3.14f/2.0f)
-    );
-    
-    // Up vector
-    vec3 up = cross( right, direction );
-
-    // Move forward
-    if (glfwGetKey( *window, GLFW_KEY_UP ) == GLFW_PRESS){
-        position += direction * deltaTime * speed;
-    }
-    // Move backward
-    if (glfwGetKey( *window, GLFW_KEY_DOWN ) == GLFW_PRESS){
-        position -= direction * deltaTime * speed;
-    }
-    // Strafe right
-    if (glfwGetKey( *window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
-        position += right * deltaTime * speed;
-    }
-    // Strafe left
-    if (glfwGetKey( *window, GLFW_KEY_LEFT ) == GLFW_PRESS){
-        position -= right * deltaTime * speed;
-    }
-
-    float FoV = initialFoV;
-
-    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    projMatrix = perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
-    // Camera matrix
-    viewMatrix       = lookAt(
-                                position,           // Camera is here
-                                position+direction, // and looks here : at the same position, plus "direction"
-                                up                  // Head is up (set to 0,-1,0 to look upside-down)
-                           );
-
-    // For the next frame, the "last time" will be "now"
-    lastTime = currentTime;
-}*/
 
 int main(int argc, char* argv[])
 {
@@ -220,7 +145,7 @@ int main(int argc, char* argv[])
     // Initialize OpenGL
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_STENCIL_TEST );
-    glEnable( GL_CULL_FACE );
+    //glEnable( GL_CULL_FACE );
 
     // Create Vertex Array Object
     GLuint vao; 
@@ -299,77 +224,10 @@ int main(int argc, char* argv[])
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    //GLuint uniColor = glGetUniformLocation( shaderProgram, "triangleColor" );
+    //GLuint uniColor = glGetUniformLocation( shaderProgram, "triangleColor" );    
 
-    //Handle input
-    // glfwGetTime is called only once, the first time this function is called
-    static double lastTime = glfwGetTime();
-
-    // Compute time difference between current and last frame
-    double currentTime = glfwGetTime();
-    float deltaTime = float( currentTime - lastTime );
-
-    // Get mouse position
-    double xpos, ypos;
-    glfwGetCursorPos( window, &xpos, &ypos );
-
-    // Reset mouse position for next frame
-    glfwSetCursorPos( window, 1024/2, 768/2 );
-
-    // Compute new orientation
-    horizontalAngle += mouseSpeed * float(1024/2 - xpos );
-    verticalAngle   += mouseSpeed * float( 768/2 - ypos );
-
-    // Direction : Spherical coordinates to Cartesian coordinates conversion
-    vec3 direction(
-        cos(verticalAngle) * sin(horizontalAngle), 
-        sin(verticalAngle),
-        cos(verticalAngle) * cos(horizontalAngle)
-    );
-    
-    // Right vector
-    vec3 right = vec3(
-        sin(horizontalAngle - 3.14f/2.0f), 
-        0,
-        cos(horizontalAngle - 3.14f/2.0f)
-    );
-    
-    // Up vector
-    vec3 up = cross( right, direction );
-
-    // Move forward
-    if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS){
-        position += direction * deltaTime * speed;
-    }
-    // Move backward
-    if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS){
-        position -= direction * deltaTime * speed;
-    }
-    // Strafe right
-    if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS){
-        position += right * deltaTime * speed;
-    }
-    // Strafe left
-    if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS){
-        position -= right * deltaTime * speed;
-    }
-
-    float FoV = initialFoV;
-
-    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    projMatrix = perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
-    // Camera matrix
-    viewMatrix       = lookAt(
-                                position,           // Camera is here
-                                position+direction, // and looks here : at the same position, plus "direction"
-                                up                  // Head is up (set to 0,-1,0 to look upside-down)
-                           );
-
-    // For the next frame, the "last time" will be "now"
-    lastTime = currentTime;
-
-    /*Set up projection 
-    mat4 view = lookAt(
+    //Set up projection 
+    mat4 viewMatrix = lookAt(
         vec3( 1.2f, 1.2f, 1.2f),
         vec3( 0.0f, 0.0f, 0.0f),
         vec3( 0.0f, 0.0f, 1.0f)
@@ -379,7 +237,7 @@ int main(int argc, char* argv[])
 
     mat4 projMatrix = perspective( 45.0f, 800.0f / 600.0f, 1.0f, 10.0f );
     GLint uniProjMatrix = glGetUniformLocation( shaderProgram, "projMatrix" );
-    glUniformMatrix4fv( uniProjMatrix, 1, GL_FALSE, value_ptr( projMatrix ));*/
+    glUniformMatrix4fv( uniProjMatrix, 1, GL_FALSE, value_ptr( projMatrix ));
 
     while ( glfwGetKey( window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && !glfwWindowShouldClose(window) ) {              
         
@@ -400,9 +258,26 @@ int main(int argc, char* argv[])
         GLint uniModel = glGetUniformLocation( shaderProgram, "model" );
         glUniformMatrix4fv( uniModel, 1, GL_FALSE, value_ptr( model ));
 
-        //Draw cube
-        glDrawArrays( GL_TRIANGLES, 0, 36 );
+        //Draw floor
+        glStencilFunc( GL_ALWAYS, 1, 0xFF ); //Set any stencil to 1
+        glStencilOp( GL_KEEP, GL_KEEP, GL_REPLACE );
+        glStencilMask( 0xFF ); // Write to stencil buffer
+        glDepthMask( GL_FALSE );
+        glClear( GL_STENCIL_BUFFER_BIT );
+
         glDrawArrays( GL_TRIANGLES, 36, 6 );
+
+        //Draw cube reflection
+        glStencilFunc( GL_EQUAL, 1, 0xFF ); //Pass test if stencil value = 1
+        glStencilMask( 0x00 ); //Don't write anything to the stencil buffer
+        glDepthMask( GL_TRUE ); // Write to depth buffer
+
+        model = scale(
+            translate( model, vec3( 0, 0, -1)),
+            vec3( 1, 1, -1 )
+            );
+        glUniformMatrix4fv( uniModel, 1, GL_FALSE, value_ptr( model ));
+        glDrawArrays( GL_TRIANGLES, 0, 36 );
         // Swap front and back buffers
         glfwSwapBuffers(window);
 
