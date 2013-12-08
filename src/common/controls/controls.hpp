@@ -4,5 +4,5 @@
 void computeMatricesFromInputs();
 glm::mat4 GetViewMatrix();
 glm::mat4 GetProjMatrix();
-
+	
 #endif 
