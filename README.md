@@ -8,4 +8,4 @@ Developed in Sublime Text.
 Currently Working On:
 ================
 
-Implement an OBJ loader
+Implementing an OBJ loader
