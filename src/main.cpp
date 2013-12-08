@@ -1,6 +1,7 @@
 //Standard C++/system headers
 #include <cstdio>
 #include <cstdlib>
+#include <cstdlib>
 #include <iostream>
 #include <thread>
 #include <string>
@@ -20,36 +21,10 @@
 #include <assimp/scene.h> //Output data structure
 #include <assimp/postprocess.h> //Post processing fla
 
-#include "common/controls/controls.hpp"
+//#include "common/controls/controls.cpp"
+#include "common/shaders/shaders.cpp"
 
 using namespace glm;
-
-// Shader sources
-const GLchar* vertexSource =
-    "#version 150 core\n"
-    "in vec3 position;"
-    "in vec3 color;"
-    "in vec2 texcoord;"
-    "out vec3 Color;"
-    "out vec2 Texcoord;"
-    "uniform mat4 model;"
-    "uniform mat4 viewMatrix;"
-    "uniform mat4 projMatrix;"
-    "void main() {"
-    "   Color = color;"
-    "   Texcoord = texcoord;"
-    "   gl_Position = projMatrix * viewMatrix * model * vec4(position, 1.0);"
-    "}";
-const GLchar* fragmentSource =
-    "#version 150 core\n"
-    "in vec3 Color;"
-    "in vec2 Texcoord;"
-    "out vec4 outColor;"
-    "uniform sampler2D texKitten;"
-    "uniform sampler2D texPuppy;"
-    "void main() {"
-    "   outColor = vec4(Color, 1.0) * mix(texture(texKitten, Texcoord), texture(texPuppy, Texcoord), 0.5);"
-    "}";
 
 GLfloat vertices[] = {
         -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
@@ -110,19 +85,7 @@ GLfloat vertices[] = {
         -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
     };
 
-// Initial position : on +Z
-vec3 position = vec3( 0, 0, 5 ); 
-// Initial horizontal angle : toward -Z
-float horizontalAngle = 3.14f;
-// Initial vertical angle : none
-float verticalAngle = 0.0f;
-// Initial Field of View
-float initialFoV = 45.0f;
-
-float speed = 3.0f; // 3 units / second
-float mouseSpeed = 0.005f;
-
-int main(int argc, char* argv[])
+int main( int argc, char* argv[] )
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -152,28 +115,15 @@ int main(int argc, char* argv[])
     glGenVertexArrays( 1, &vao );
     glBindVertexArray( vao );
 
+    //Load Shaders into a shader program
+    GLuint shaderProgram = LoadShaders( "VertexShader.vertexshader", "FragmentShader.fragmentshader" );
+
     // Create Vertex Array Object and copy the vertex data to it
     GLuint vbo;
     glGenBuffers( 1, &vbo ); //Generate 1 buffer
 
     glBindBuffer( GL_ARRAY_BUFFER, vbo );
     glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW ); 
-
-    // Create and compile the Vertex Shader and Fragment Shader
-    GLuint vertexShader = glCreateShader( GL_VERTEX_SHADER );
-    glShaderSource( vertexShader, 1, &vertexSource, NULL );
-    glCompileShader( vertexShader );
-    GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
-    glShaderSource( fragmentShader, 1, &fragmentSource, NULL );
-    glCompileShader( fragmentShader );
-    
-    // Combine the shaders into a shader program
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader( shaderProgram, vertexShader );
-    glAttachShader( shaderProgram, fragmentShader );
-    glBindFragDataLocation( shaderProgram, 0, "outColor" );
-    glLinkProgram( shaderProgram );
-    glUseProgram( shaderProgram );
 
     // Specify the layout of the vertex data
     GLint posAttrib = glGetAttribLocation( shaderProgram, "position" );
@@ -241,9 +191,14 @@ int main(int argc, char* argv[])
 
     while ( glfwGetKey( window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && !glfwWindowShouldClose(window) ) {              
         
-        // Clear the screen to black
-        glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+        //computeMatricesFromInputs();
+
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+        // Clear the screen to dark blue
+        glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+
+        glUseProgram( shaderProgram );
 
         //Calculate transformation
         mat4 model;
@@ -272,11 +227,11 @@ int main(int argc, char* argv[])
         glStencilMask( 0x00 ); //Don't write anything to the stencil buffer
         glDepthMask( GL_TRUE ); // Write to depth buffer
 
-        model = scale(
+        /*model = scale(
             translate( model, vec3( 0, 0, -1)),
             vec3( 1, 1, -1 )
             );
-        glUniformMatrix4fv( uniModel, 1, GL_FALSE, value_ptr( model ));
+        glUniformMatrix4fv( uniModel, 1, GL_FALSE, value_ptr( model ));*/
         glDrawArrays( GL_TRIANGLES, 0, 36 );
         // Swap front and back buffers
         glfwSwapBuffers(window);
@@ -286,9 +241,6 @@ int main(int argc, char* argv[])
     }
 
     glDeleteTextures( 2, textures );
-    glDeleteProgram( shaderProgram );
-    glDeleteShader( fragmentShader );
-    glDeleteShader( vertexShader );
 
     glDeleteBuffers( 1, &vbo );
 
