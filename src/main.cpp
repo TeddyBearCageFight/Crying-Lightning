@@ -107,22 +107,22 @@ int main( int argc, char* argv[] )
 
     // Initialize OpenGL
     glEnable( GL_DEPTH_TEST );
-    glEnable( GL_STENCIL_TEST );
+    //glEnable( GL_STENCIL_TEST );
     //glEnable( GL_CULL_FACE );
 
     // Create Vertex Array Object
-    GLuint vao; 
-    glGenVertexArrays( 1, &vao );
-    glBindVertexArray( vao );
+    GLuint VertexArrayID; 
+    glGenVertexArrays( 1, &VertexArrayID );
+    glBindVertexArray( VertexArrayID );
 
     //Load Shaders into a shader program
     GLuint shaderProgram = LoadShaders( "VertexShader.vertexshader", "FragmentShader.fragmentshader" );
 
     // Create Vertex Array Object and copy the vertex data to it
-    GLuint vbo;
-    glGenBuffers( 1, &vbo ); //Generate 1 buffer
+    GLuint VertexBufferID;
+    glGenBuffers( 1, &VertexBufferID ); //Generate 1 buffer
 
-    glBindBuffer( GL_ARRAY_BUFFER, vbo );
+    glBindBuffer( GL_ARRAY_BUFFER, VertexBufferID );
     glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW ); 
 
     // Specify the layout of the vertex data
@@ -174,7 +174,7 @@ int main( int argc, char* argv[] )
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    //GLuint uniColor = glGetUniformLocation( shaderProgram, "triangleColor" );    
+    GLuint uniColor = glGetUniformLocation( shaderProgram, "model" );    
 
     //Set up projection 
     mat4 viewMatrix = lookAt(
@@ -216,15 +216,15 @@ int main( int argc, char* argv[] )
         //Draw floor
         glStencilFunc( GL_ALWAYS, 1, 0xFF ); //Set any stencil to 1
         glStencilOp( GL_KEEP, GL_KEEP, GL_REPLACE );
-        glStencilMask( 0xFF ); // Write to stencil buffer
+        //glStencilMask( 0xFF ); // Write to stencil buffer
         glDepthMask( GL_FALSE );
-        glClear( GL_STENCIL_BUFFER_BIT );
+        //glClear( GL_STENCIL_BUFFER_BIT );
 
         glDrawArrays( GL_TRIANGLES, 36, 6 );
 
         //Draw cube reflection
-        glStencilFunc( GL_EQUAL, 1, 0xFF ); //Pass test if stencil value = 1
-        glStencilMask( 0x00 ); //Don't write anything to the stencil buffer
+        //glStencilFunc( GL_EQUAL, 1, 0xFF ); //Pass test if stencil value = 1
+        //glStencilMask( 0x00 ); //Don't write anything to the stencil buffer
         glDepthMask( GL_TRUE ); // Write to depth buffer
 
         /*model = scale(
@@ -242,9 +242,9 @@ int main( int argc, char* argv[] )
 
     glDeleteTextures( 2, textures );
 
-    glDeleteBuffers( 1, &vbo );
+    glDeleteBuffers( 1, &VertexBufferID );
 
-    glDeleteVertexArrays( 1, &vao);
+    glDeleteVertexArrays( 1, &VertexArrayID );
 
     glfwTerminate();
     return 0;
