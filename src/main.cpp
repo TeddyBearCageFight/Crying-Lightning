@@ -18,7 +18,6 @@
 #include <SOIL/SOIL.h>
 
 #include <assimp/Importer.hpp> //C++ Importer interface
-#include <assimp/scene.h> //Output data structure
 #include <assimp/postprocess.h> //Post processing fla
 
 //#include "common/controls/controls.cpp"
@@ -26,7 +25,32 @@
 
 using namespace glm;
 
-GLfloat vertices[] = {
+int main( int argc, char* argv[] )
+{
+    // Initialize GLFW
+    if (!glfwInit())
+        return -1;
+
+    // Create a windowed mode window and its OpenGL context
+    GLFWwindow* window = glfwCreateWindow( 800, 600, "Crying Lightning", nullptr, nullptr);   
+    glfwMakeContextCurrent(window);
+
+    if (!window)
+    {
+        glfwTerminate();
+        return -1;
+    }
+
+    // Initialize GLEW
+    glewExperimental = GL_TRUE;
+    glewInit();
+
+    // Initialize OpenGL
+    glEnable( GL_DEPTH_TEST );
+    glEnable( GL_STENCIL_TEST );
+    //glEnable( GL_CULL_FACE );
+
+    GLfloat vertices[] = {
         -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
          0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
          0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
@@ -35,9 +59,9 @@ GLfloat vertices[] = {
         -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 
         -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+        -1.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
         -0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
         -0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 
@@ -72,43 +96,10 @@ GLfloat vertices[] = {
         -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
          1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
          1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-         1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-        -1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-
-
-        -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-         1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-         1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-         1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         15.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
         -1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
     };
-
-int main( int argc, char* argv[] )
-{
-    // Initialize GLFW
-    if (!glfwInit())
-        return -1;
-
-    // Create a windowed mode window and its OpenGL context
-    GLFWwindow* window = glfwCreateWindow( 800, 600, "Crying Lightning", nullptr, nullptr);   
-    glfwMakeContextCurrent(window);
-
-    if (!window)
-    {
-        glfwTerminate();
-        return -1;
-    }
-
-    // Initialize GLEW
-    glewExperimental = GL_TRUE;
-    glewInit();
-
-    // Initialize OpenGL
-    glEnable( GL_DEPTH_TEST );
-    //glEnable( GL_STENCIL_TEST );
-    //glEnable( GL_CULL_FACE );
 
     // Create Vertex Array Object
     GLuint VertexArrayID; 
@@ -117,13 +108,27 @@ int main( int argc, char* argv[] )
 
     //Load Shaders into a shader program
     GLuint shaderProgram = LoadShaders( "VertexShader.vertexshader", "FragmentShader.fragmentshader" );
+    glUseProgram(shaderProgram);
+ 
+    /*----------------------------------
+     ___ _   _ ___ ___ ___ ___  ___ 
+    | _ ) | | | __| __| __| _ \/ __|
+    | _ \ |_| | _|| _|| _||   /\__ \
+    |___/\___/|_| |_| |___|_|_\|___/
+                                 
+    ------------------------------------*/
 
     // Create Vertex Array Object and copy the vertex data to it
     GLuint VertexBufferID;
     glGenBuffers( 1, &VertexBufferID ); //Generate 1 buffer
 
     glBindBuffer( GL_ARRAY_BUFFER, VertexBufferID );
-    glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW ); 
+    glBufferData( GL_ARRAY_BUFFER,	 sizeof(vertices), vertices, GL_STATIC_DRAW ); 
+
+    GLuint frameBuffer;
+    glGenFramebuffers( 1, &frameBuffer );
+    glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
+
 
     // Specify the layout of the vertex data
     GLint posAttrib = glGetAttribLocation( shaderProgram, "position" );
@@ -132,11 +137,11 @@ int main( int argc, char* argv[] )
 
     GLint colAttrib = glGetAttribLocation( shaderProgram, "color" );
     glEnableVertexAttribArray( colAttrib );
-    glVertexAttribPointer( colAttrib, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(2*sizeof(float)));
+    glVertexAttribPointer( colAttrib, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
 
     GLint texAttrib = glGetAttribLocation( shaderProgram, "texcoord" );
     glEnableVertexAttribArray( texAttrib );
-    glVertexAttribPointer( texAttrib, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(5*sizeof(float)));
+    glVertexAttribPointer( texAttrib, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6*sizeof(float)));
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
@@ -147,7 +152,7 @@ int main( int argc, char* argv[] )
     GLuint textures[2];
     glGenTextures( 2, textures );
 
-    int width, height;
+    int width, height;  
     unsigned char* image;
 
     glActiveTexture(GL_TEXTURE0);
@@ -159,8 +164,8 @@ int main( int argc, char* argv[] )
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, textures[1]);
@@ -171,34 +176,69 @@ int main( int argc, char* argv[] )
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    GLuint uniColor = glGetUniformLocation( shaderProgram, "model" );    
+    GLuint texColorBuffer;
+    glGenTextures( 1, &texColorBuffer );
+    glBindTexture( GL_TEXTURE_2D, texColorBuffer );
+
+    //Attach image to the framebuffer
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL
+        );
+
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0
+        );
+
+    //Renderbuffer object image
+    GLuint rboDepthStencil;
+    glGenRenderbuffers( 1, &rboDepthStencil );
+    glBindRenderbuffer( GL_RENDERBUFFER, rboDepthStencil );
+    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600 );
+
+    glFramebufferRenderbuffer(
+        GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepthStencil
+        );
+
+    glBindFramebuffer( GL_FRAMEBUFFER, frameBuffer );
+    glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+    
+    GLuint uniModel = glGetUniformLocation( shaderProgram, "model" );    
 
     //Set up projection 
-    mat4 viewMatrix = lookAt(
-        vec3( 1.2f, 1.2f, 1.2f),
+    mat4 view = lookAt(
+        vec3( 2.5f, 2.5f, 2.5f),
         vec3( 0.0f, 0.0f, 0.0f),
         vec3( 0.0f, 0.0f, 1.0f)
         );
-    GLint uniViewMatrix = glGetUniformLocation( shaderProgram, "viewMatrix" );
-    glUniformMatrix4fv( uniViewMatrix, 1, GL_FALSE, value_ptr( viewMatrix ));
+    GLint uniView = glGetUniformLocation( shaderProgram, "view" );
+    glUniformMatrix4fv( uniView, 1, GL_FALSE, value_ptr( view ));
 
-    mat4 projMatrix = perspective( 45.0f, 800.0f / 600.0f, 1.0f, 10.0f );
-    GLint uniProjMatrix = glGetUniformLocation( shaderProgram, "projMatrix" );
-    glUniformMatrix4fv( uniProjMatrix, 1, GL_FALSE, value_ptr( projMatrix ));
+    mat4 proj = perspective( 45.0f, 800.0f / 600.0f, 1.0f, 10.0f );
+    GLint uniProj = glGetUniformLocation( shaderProgram, "proj" );
+    glUniformMatrix4fv( uniProj, 1, GL_FALSE, value_ptr( proj ));
 
+    GLint uniColor = glGetUniformLocation( shaderProgram, "overrideColor" );
+
+    /*------------------------
+     ___  ___    ___      __
+    |   \| _ \  /_\ \    / /
+    | |) |   / / _ \ \/\/ / 
+    |___/|_|_\/_/ \_\_/\_/  
+
+    ---------------------------*/
+                         
     while ( glfwGetKey( window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && !glfwWindowShouldClose(window) ) {              
         
         //computeMatricesFromInputs();
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-        // Clear the screen to dark blue
-        glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-
-        glUseProgram( shaderProgram );
+        glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
 
         //Calculate transformation
         mat4 model;
@@ -207,33 +247,39 @@ int main( int argc, char* argv[] )
             (float)clock() / (float)CLOCKS_PER_SEC * 180.0f, 
             vec3( 0.0f, 0.0f, 1.0f )
             );
-        vec4 result = model * vec4( 1.0f, 0.0f, 0.0f, 1.0f );
-        printf( "%f, %f, %f\n", result.x, result.y, result.z );
+        /*vec4 result = model * vec4( 1.0f, 0.0f, 0.0f, 1.0f );
+        printf( "%f, %f, %f\n", result.x, result.y, result.z );*/
 
-        GLint uniModel = glGetUniformLocation( shaderProgram, "model" );
         glUniformMatrix4fv( uniModel, 1, GL_FALSE, value_ptr( model ));
 
-        //Draw floor
-        glStencilFunc( GL_ALWAYS, 1, 0xFF ); //Set any stencil to 1
-        glStencilOp( GL_KEEP, GL_KEEP, GL_REPLACE );
-        //glStencilMask( 0xFF ); // Write to stencil buffer
-        glDepthMask( GL_FALSE );
-        //glClear( GL_STENCIL_BUFFER_BIT );
+        glDrawArrays(GL_TRIANGLES, 0, 36 );
 
-        glDrawArrays( GL_TRIANGLES, 36, 6 );
+        glEnable( GL_STENCIL_TEST );
 
-        //Draw cube reflection
-        //glStencilFunc( GL_EQUAL, 1, 0xFF ); //Pass test if stencil value = 1
-        //glStencilMask( 0x00 ); //Don't write anything to the stencil buffer
-        glDepthMask( GL_TRUE ); // Write to depth buffer
+        // Draw floor
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilMask(0xFF);
+        glDepthMask(GL_FALSE);
+        glClear(GL_STENCIL_BUFFER_BIT);
+                
+        glDrawArrays(GL_TRIANGLES, 36, 6);
 
-        /*model = scale(
-            translate( model, vec3( 0, 0, -1)),
-            vec3( 1, 1, -1 )
-            );
-        glUniformMatrix4fv( uniModel, 1, GL_FALSE, value_ptr( model ));*/
-        glDrawArrays( GL_TRIANGLES, 0, 36 );
-        // Swap front and back buffers
+        // Draw cube reflection
+        glStencilFunc(GL_EQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDepthMask(GL_TRUE);
+
+        model = glm::scale(glm::translate(model, glm::vec3(0, 0, -1)), glm::vec3(1, 1, -1));
+        glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+
+        glUniform3f(uniColor, 0.3f, 0.3f, 0.3f);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
+
+        glDisable( GL_STENCIL_TEST );
+
+        // Swap front and back buffers */
         glfwSwapBuffers(window);
 
         // Poll for and process events
@@ -243,7 +289,8 @@ int main( int argc, char* argv[] )
     glDeleteTextures( 2, textures );
 
     glDeleteBuffers( 1, &VertexBufferID );
-
+    glDeleteFramebuffers( 1, &frameBuffer );
+    glDeleteRenderbuffers( 1, &rboDepthStencil );
     glDeleteVertexArrays( 1, &VertexArrayID );
 
     glfwTerminate();
