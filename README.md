@@ -1,4 +1,4 @@
-Crying Lightning
+Wendigo
 ================
 
 An experimental game engine written in C++ with OpenGL 3.3 and up, implimenting the GLEW, GLFW, SOIL, GLM, and Assimp.
@@ -8,7 +8,3 @@ Developed on and for Linux, but due to the inherit nature of the libraries used,
 ================
 
 IDE independant - written, compiled, and linked manually for the ultimate cross-distro compatibility.
-
-================
-
-MIT License
